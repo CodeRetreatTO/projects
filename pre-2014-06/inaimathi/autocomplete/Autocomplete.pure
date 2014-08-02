@@ -1,0 +1,10 @@
+using system, posix;
+
+completions partial = filter (startsWith partial) words;
+
+startsWith start word = start == (substr word 0 (#start));
+
+words = split "\n" $ fget $ fopen "/usr/share/dict/american-english" "r";
+
+map (printf "%s\n") $ completions "t";
+map (printf "%s\n") $ completions "fre";
