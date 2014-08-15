@@ -6,7 +6,8 @@ import Data.Data (Data, Typeable)
 import Data.List (nub, groupBy, sortBy)
 import Data.Maybe (catMaybes)
 import Data.Function (on)
-import Data.IxSet (Indexable(..), IxSet(..), (@=), Proxy(..), getOne, ixFun, ixSet, fromList, toList, toAscList)
+import Data.IxSet (Indexable(..), IxSet(..), (@=), getOne, ixFun, ixSet, fromList, toList)
+
 
 data State = Off | Recovering | On deriving (Eq, Ord, Show, Typeable)
 data Coords = Coords { x :: Int, y :: Int } deriving (Eq, Ord, Show, Typeable)
@@ -18,11 +19,6 @@ instance Indexable Cell where
 type Grid = IxSet Cell
 type Rules = (Cell -> [Cell] -> Maybe Cell)
 
-osc :: Grid
-osc = fromList [ Cell (Coords 2 1) Recovering, Cell (Coords 2 2) On, Cell (Coords 3 2) On
-               , Cell (Coords 4 2) Recovering, Cell (Coords 1 3)  Recovering, Cell (Coords 2 3) On, Cell (Coords 3 3) On
-               , Cell (Coords 3 4) Recovering]
-
 neighbors :: Grid -> Cell -> [Cell]
 neighbors grid (Cell (Coords x y) _) = map cellAt cs
     where cs = [Coords (x'+x) (y'+y) | x' <- [-1..1], y' <- [-1..1], (x', y') /= (0, 0)]
@@ -30,12 +26,22 @@ neighbors grid (Cell (Coords x y) _) = map cellAt cs
                        Just cell -> cell 
                        Nothing -> Cell c Off
 
+next :: Rules -> Grid -> Grid
+next fn grid = fromList $ catMaybes $ map (\c -> fn c (neighbors grid c)) potentials 
+    where potentials = nub $ concatMap (neighbors grid) $ toList grid
+
+briansRules :: Rules
 briansRules (Cell coords On) _ = Just $ Cell coords Recovering
 briansRules (Cell _ Recovering) _ = Nothing
 briansRules (Cell coords Off) ns = case filter (==On) $ map state ns of
                                      [_, _] -> Just $ Cell coords On
                                      _ -> Nothing
 
+main = mapM_ print $ take 4 $ iterate (next briansRules) osc
+    where print g = do putStr $ showGrid g
+                       putStrLn "------------------------------"
+
+----- Show routines
 showGrid :: Grid -> String
 showGrid g = unlines $ map showLine lines
     where desc = sortBy (onY compare) $ toList g
@@ -53,10 +59,9 @@ showState Off = ' '
 showState On = 'X'
 showState Recovering = 'O'
 
-next :: Rules -> Grid -> Grid
-next fn grid = fromList $ catMaybes $ map (\c -> fn c (neighbors grid c)) potentials 
-    where potentials = nub $ concatMap (neighbors grid) $ toList grid
-
-main = mapM_ print $ take 10 $ iterate (next briansRules) osc
-    where print g = do putStr $ showGrid g
-                       putStrLn "------------------------------"
+----- Test data
+osc :: Grid
+osc = fromList [ Cell (Coords 2 1) Recovering, Cell (Coords 2 2) On, Cell (Coords 3 2) On
+               , Cell (Coords 4 2) Recovering, Cell (Coords 1 3)  Recovering, Cell (Coords 2 3) On
+               , Cell (Coords 3 3) On, Cell (Coords 3 4) Recovering
+               ]
