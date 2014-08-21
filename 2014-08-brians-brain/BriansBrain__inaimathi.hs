@@ -56,8 +56,8 @@ showLine ln = recur ln 0 ""
               | otherwise = recur ln (succ ct) $ ' ':acc
 
 showState Off = ' '
-showState On = 'X'
-showState Recovering = 'O'
+showState Recovering = '.'
+showState On = 'O'
 
 ----- Test data
 osc :: Grid
