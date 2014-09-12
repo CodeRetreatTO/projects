@@ -1,6 +1,6 @@
 module Langton where
 
-import Prelude hiding (Left, Right, flip)
+import Prelude hiding (Left, Right)
 
 data Direction = Up | Right | Down | Left deriving (Eq, Enum, Show)
 
@@ -13,17 +13,17 @@ left Up = Left
 left dir = pred dir
 
 data Ant = Ant Int Int Direction deriving (Eq, Show)
-data World = World Ant Coords deriving (Show)
+data World = World [Ant] Coords deriving (Show)
 type Coords = [(Int, Int)]
 
 
-flip :: (Int, Int) -> Coords -> Coords
-flip cell coords= if cell `elem` coords
+flipCell :: (Int, Int) -> Coords -> Coords
+flipCell cell coords= if cell `elem` coords
                   then filter (/=cell) coords
                   else cell:coords
 
-turn :: Ant -> Coords -> Ant
-turn (Ant x y dir) coords = Ant x y $ if (x, y) `elem` coords
+turn :: Coords -> Ant -> Ant
+turn coords (Ant x y dir) = Ant x y $ if (x, y) `elem` coords
                                       then left dir
                                       else right dir
 
@@ -34,10 +34,10 @@ onwards (Ant x y Down) = Ant x (succ y) Down
 onwards (Ant x y Left) = Ant (pred x) y Left
 
 step :: World -> World
-step (World ant@(Ant x y _) coords) = World newAnt newCoords
-    where newCoords = flip (x, y) coords
-          newAnt = onwards $ turn ant coords
+step (World ants coords) = World newAnts newCoords
+    where newCoords = foldl (\memo (Ant x y _) -> flipCell (x, y) memo) coords ants
+          newAnts = map (onwards . turn coords) ants
 
-test = World (Ant 4 4 Up) []
+test = World [(Ant 4 4 Up), (Ant 3 7 Left)] []
 
-main = mapM_ (putStrLn . show) . take 400 $ iterate step test
+main = mapM_ (putStrLn . show) . take 10 $ iterate step test
