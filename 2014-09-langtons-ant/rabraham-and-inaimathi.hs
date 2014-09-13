@@ -4,6 +4,8 @@ import Prelude hiding (Left, Right)
 
 import Haste
 import Data.Set (Set(..), member, insert, delete, fromList)
+import Data.Maybe
+import qualified Data.Map as Map
 
 data Direction = Up | Right | Down | Left deriving (Eq, Enum, Show)
 
@@ -40,17 +42,22 @@ step (World ants coords) = World newAnts newCoords
     where newCoords = foldl (\memo (Ant x y _) -> flipCell (x, y) memo) coords ants
           newAnts = map (onwards . turn coords) ants
 
-test = World [(Ant 4 4 Up), (Ant 3 7 Left), (Ant 27 34 Down)] $ fromList []
 
+----- Pretty-print a world state
 showWorld :: (Int, Int) -> World -> String
 showWorld (w, h) (World ants coords) = unlines [line y | y <- [0..h]]
     where line y = [charOf (x, y) | x <- [0..w]]
-          antCells = map (\(Ant x y _) -> (x, y)) ants
+          antCells = Map.fromList $ map (\(Ant x y dir) -> ((x, y), dir )) ants
+          charDir Up = '↑'
+          charDir Down = '↓'
+          charDir Left = '←'
+          charDir Right = '→'
           charOf cell
-              | cell `elem` antCells = '+'
+              | cell `Map.member` antCells = charDir . fromJust $ Map.lookup cell antCells
               | cell `member` coords = 'O'
               | otherwise = ' '
 
+----- Haste stuff
 setContent :: ElemID -> String -> IO ()
 setContent id newContent = withElem id (\e -> setProp e "innerHTML" newContent)
 
@@ -62,5 +69,9 @@ animate delay size world steps = setTimeout delay $ recur world steps
           recur world ct = do puts ct world
                               setTimeout delay $ recur (step world) $ pred ct
 
+
+----- Test data and main
+test = World [(Ant 4 4 Up), (Ant 3 7 Left), (Ant 27 34 Down)] $ fromList []
+
 main :: IO ()
-main = animate 50 (50, 50) test 4000
+main = animate 10 (50, 50) test 4000
