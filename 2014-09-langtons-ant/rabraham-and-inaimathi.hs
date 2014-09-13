@@ -1,6 +1,8 @@
-module Langton where
+module Main where
 
 import Prelude hiding (Left, Right)
+
+import Haste
 import Data.Set (Set(..), member, insert, delete, fromList)
 
 data Direction = Up | Right | Down | Left deriving (Eq, Enum, Show)
@@ -38,7 +40,7 @@ step (World ants coords) = World newAnts newCoords
     where newCoords = foldl (\memo (Ant x y _) -> flipCell (x, y) memo) coords ants
           newAnts = map (onwards . turn coords) ants
 
-test = World [(Ant 4 4 Up), (Ant 3 7 Left)] $ fromList []
+test = World [(Ant 4 4 Up), (Ant 3 7 Left), (Ant 27 34 Down)] $ fromList []
 
 showWorld :: (Int, Int) -> World -> String
 showWorld (w, h) (World ants coords) = unlines [line y | y <- [0..h]]
@@ -49,4 +51,16 @@ showWorld (w, h) (World ants coords) = unlines [line y | y <- [0..h]]
               | cell `member` coords = 'O'
               | otherwise = ' '
 
-main = mapM_ (putStrLn . showWorld (10, 10)) . take 40 $ iterate step test
+setContent :: ElemID -> String -> IO ()
+setContent id newContent = withElem id (\e -> setProp e "innerHTML" newContent)
+
+animate :: Int -> (Int, Int) -> World -> Int -> IO ()
+animate delay size world steps = setTimeout delay $ recur world steps
+    where puts ct w = do setContent "world" $ showWorld size w
+                         setContent "generations" $ show (steps - ct)
+          recur world 0 = setTimeout delay $ puts 0 world
+          recur world ct = do puts ct world
+                              setTimeout delay $ recur (step world) $ pred ct
+
+main :: IO ()
+main = animate 50 (50, 50) test 4000
