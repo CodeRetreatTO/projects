@@ -49,9 +49,9 @@ showWorld (w, h) (World ants coords) = unlines [line y | y <- [0..h]]
     where line y = [charOf (x, y) | x <- [0..w]]
           antCells = Map.fromList $ map (\(Ant x y dir) -> ((x, y), dir )) ants
           charDir Up = '↑'
+          charDir Right = '→'
           charDir Down = '↓'
           charDir Left = '←'
-          charDir Right = '→'
           charOf cell
               | cell `Map.member` antCells = charDir . fromJust $ Map.lookup cell antCells
               | cell `member` coords = 'O'
