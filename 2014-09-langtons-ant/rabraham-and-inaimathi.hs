@@ -87,14 +87,16 @@ loop f a = do res <- f a
 test :: World
 test = World [(Ant (Point 4 4) Up), (Ant (Point 3 7) Left), (Ant (Point 15 12) Down)] $ fromList []
 
-serverDemo :: IO ()
-serverDemo = mapM_ print . take 20 $ iterate step test
+server :: IO ()
+server = mapM_ print . take 20 $ iterate step test
     where print w = do putStr $ showWorld w
                        putStrLn "--------------------"
 
-main :: IO ()
-main = concurrent $ loop nextFrame (test, 0)
+client :: IO ()
+client = concurrent $ loop nextFrame (test, 0)
     where nextFrame (w, ct) = do liftIO $ setContent "world" $ showWorld w
                                  liftIO $ setContent "generations" $ show ct
                                  wait 50
                                  return $ (step w, succ ct)
+
+main = client
