@@ -1,0 +1,109 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style></style>
+</head><body>
+  
+  <img src="tower2.png" id="tower" />
+  
+  <canvas id="edges" width="300" height="300" ></canvas>
+
+  <canvas id="highlight" width="300" height="300" ></canvas>
+
+  <canvas id="output" width="300" height="300" ></canvas>
+  
+<script>
+  window.addEventListener("load", function() {
+    edges = document.getElementById('edges');
+    edges_ctx = edges.getContext('2d');
+    
+    highlight = document.getElementById('highlight');
+    highlight_ctx = highlight.getContext('2d');
+    
+    // output = document.getElementById('output');
+    // output_ctx = output.getContext('2d');
+    
+    canvas = document.createElement('canvas');
+    ctx    = canvas.getContext('2d');
+  
+    myImgElement = document.getElementById('tower');
+    ctx.drawImage( myImgElement, 0, 0 );
+  
+    width = myImgElement.width, 
+    height = myImgElement.height;
+    imgdata = ctx.getImageData(0,0,width,height);
+    rgba = imgdata.data;
+    
+    main()
+  })
+  
+  function main() {
+    weightedImage = get_weights(rgba)
+    
+    edges_ctx.putImageData(weightedImage, 0, 0)
+
+    highlight = highlight_seam(imgdata, weightedImage)
+
+    highlight_ctx.putImageData(weights, 0, 0)
+
+    // output_ctx.putImageData(weights, 0, 0)
+  }
+  
+  function get_all_seams(weightedImage) {
+    var weights = []
+    
+    for (var px=0, ct=width*height*4 ;px<ct; px+=4) {
+      weights[px] = weightedImage.data[px]
+    }
+    
+    var matrix = []
+    var previous = weights.slice(0, width-1)
+    var current = []
+    
+    for (var i = 0; i < width; i++) {
+      matrix[0].push(0)
+    }
+    
+    for (var i = 1; i < height; i++) {
+      for (var j = 0; j < width; j++) {
+        min = 0;
+        for(k=j-1;k<=j+1;j++)
+      }
+      matrix[0].push(0)
+    }
+    
+  }
+  
+  function highlight_seam(realImage, weightedImage) {
+    var highlight = ctx.getImageData(0,0,width,height)
+    
+  }
+  
+  
+  function get_weights(rgba) {
+    // var weights = []
+    var weights = ctx.getImageData(0,0,width,height)
+    // return weights
+    
+    for (var px=0, ct=width*height*4 ;px<ct; px+=4){
+      var r = rgba[px  ];
+      var g = rgba[px+1];
+      var b = rgba[px+2];
+
+      var next_r = rgba[4 + px  ];
+      var next_g = rgba[4 + px+1];
+      var next_b = rgba[4 + px+2];
+      
+      var weight = Math.abs(r - next_r) + Math.abs(g - next_g) + Math.abs(b - next_b)
+      
+      // weights.push(weight)
+      weights.data[px] = weight
+      weights.data[px+1] = weight
+      weights.data[px+2] = weight
+      weights.data[px+3] = 255
+    }
+    
+    return weights
+  }
+  
+</script>
+</body></html>
