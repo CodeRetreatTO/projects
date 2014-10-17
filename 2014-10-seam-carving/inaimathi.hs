@@ -4,14 +4,12 @@ import Data.Char (ord)
 import Data.List (sortBy)
 import Data.Function (on)
 
-scoreLine :: String -> [Integer]
-scoreLine line = map total zipped
-    where l = map (toInteger . ord) line
-          zipped = zip3 (head l:l) l $ tail l
-          total (a, b, c) = abs (a-b) + abs (b-c)
-
 scoreGrid :: Image -> Score
 scoreGrid ls = map scoreLine ls
+    where scoreLine ln = map total zipped
+              where l = map (toInteger . ord) ln
+                    zipped = zip3 (head l:l) l $ tail l
+                    total (a, b, c) = abs (a-b) + abs (b-c)
 
 maskSeam :: Image -> Seam -> Image
 maskSeam = applySeam (replace ' ')
@@ -27,7 +25,7 @@ seamsIn [] = []
 seamsIn s = sortByWeight allSeams
     where allSeams = foldl (\memo ln -> line ln memo) (freshSeams $ head s) $ tail s
           line ln seams = concatMap (\(ix, w) -> choose ix w seams) $ zip [0..] ln
-          choose ix w seams = map (\seam -> add seam w ix) $ potentials ix seams
+          choose ix w seams = map (\seam -> add seam w ix) . take 1 . sortByWeight $ potentials ix seams
           potentials ix seams = take 3 $ drop (max 0 (fromIntegral ix-1)) seams
 
 scaleBy :: Image -> Int -> Image
@@ -38,11 +36,10 @@ scaleBy pic count = head $ drop count $ iterate scaleOne pic
 
 main :: IO ()
 main = do f <- fmap lines $ readFile "scene.txt"
-          mapM_ putStrLn $ scaleBy f 10
-          putStrLn " "
-          mapM_ putStrLn $ scaleBy f 30
-          putStrLn " "
-          mapM_ putStrLn $ scaleBy f 50
+          mapM_ putBlock [ f
+                         , scaleBy f 10
+                         , scaleBy f 30
+                         , scaleBy f 50 ]
 
 ----- Types and related minutia
 type Score = [[Integer]]
@@ -57,6 +54,10 @@ indices :: Seam -> [Integer]
 indices (Seam _ ixs) = reverse ixs
 
 ----- Utility
+putBlock :: [String] -> IO ()
+putBlock lns = do mapM_ putStrLn lns
+                  putStrLn " "
+
 applySeam :: (Integer -> String -> String) -> Image -> Seam -> Image
 applySeam fn lns seam = map (\(ix, ln) -> fn ix ln) $ zip (indices seam) lns
 
