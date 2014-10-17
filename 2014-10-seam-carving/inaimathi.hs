@@ -27,7 +27,7 @@ seamsIn [] = []
 seamsIn s = sortByWeight allSeams
     where allSeams = foldl (\memo ln -> line ln memo) (freshSeams $ head s) $ tail s
           line ln seams = concatMap (\(ix, w) -> choose ix w seams) $ zip [0..] ln
-          choose ix w seams = map (\seam -> add seam w ix) . take 1 . sortByWeight $ potentials ix seams
+          choose ix w seams = map (\seam -> add seam w ix) $ potentials ix seams
           potentials ix seams = take 3 $ drop (max 0 (fromIntegral ix-1)) seams
 
 scaleBy :: Image -> Int -> Image
