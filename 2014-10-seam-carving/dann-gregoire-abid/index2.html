@@ -16,27 +16,30 @@
     var el = document.getElementById('tower')
     var imageData = extract_image_data(el)
     
-    edges = document.getElementById('edges');
-    edges_ctx = edges.getContext('2d');
-    
-    highlight = document.getElementById('highlight');
-    highlight_ctx = highlight.getContext('2d');
-    
-    // output = document.getElementById('output');
-    // output_ctx = output.getContext('2d');
-    
     main(imageData)
   })
   
   function main(imageData) {
-    weightedImage = get_weights(imageData)
+    var weightedImage = get_weights(imageData)
     
+    var edges_el  = document.getElementById('edges')
+    var edges_ctx = edges_el.getContext('2d')
     edges_ctx.putImageData(weightedImage, 0, 0)
 
-    highlight = highlight_seam(imageData, weightedImage)
-
+    var highlight_el  = document.getElementById('highlight')
+    var highlight_ctx = highlight_el.getContext('2d')
+    // draw the edge detection picture
+    highlight_ctx.putImageData(weightedImage, 0, 0)
+    // draw some seams
+    var seams = get_seams(weightedImage)
+    var seamImage = get_seam_image(seams, weightedImage)
+    // highlight_ctx.putImageData(seamImage, 0, 0)
+    
+    // highlight = highlight_seam(imageData, weightedImage)
     // highlight_ctx.putImageData(weights, 0, 0)
 
+    // output = document.getElementById('output')
+    // output_ctx = output.getContext('2d')
     // output_ctx.putImageData(weights, 0, 0)
   }
   
@@ -44,7 +47,7 @@
     var width  = el.width 
     var height = el.height
     
-    var canvas = document.createElement('canvas');
+    var canvas = document.createElement('canvas')
     canvas.width  = width
     canvas.height = height
 
@@ -61,18 +64,18 @@
 
     var rgba = imageData.data
     
-    for (var px=0, ct=width*height*4 ;px<ct; px+=4){
-      var r = rgba[px  ];
-      var g = rgba[px+1];
-      var b = rgba[px+2];
+    for(var px=0, ct=width*height*4; px<ct; px+=4) {
+      var r = rgba[px  ]
+      var g = rgba[px+1]
+      var b = rgba[px+2]
 
-      var right_r = rgba[px   + 4];
-      var right_g = rgba[px+1 + 4];
-      var right_b = rgba[px+2 + 4];
+      var right_r = rgba[px   + 4]
+      var right_g = rgba[px+1 + 4]
+      var right_b = rgba[px+2 + 4]
       
-      var down_r  = rgba[px   + 4 * width];
-      var down_g  = rgba[px+1 + 4 * width];
-      var down_b  = rgba[px+2 + 4 * width];
+      var down_r  = rgba[px   + 4 * width]
+      var down_g  = rgba[px+1 + 4 * width]
+      var down_b  = rgba[px+2 + 4 * width]
       
       var weight = Math.abs(r - right_r) + Math.abs(g - right_g) + Math.abs(b - right_b)
                  + Math.abs(r - down_r)  + Math.abs(g - down_g)  + Math.abs(b - down_b)
@@ -87,10 +90,24 @@
   }
   
   
+  function get_seams(weightedImage) {
+    var width     = weightedImage.width
+    var height    = weightedImage.height
+    var highlight = ctx.createImageData(width, height)
+    
+  }
+  
+  function get_seam_image(seams, weightedImage) {
+    var width     = weightedImage.width
+    var height    = weightedImage.height
+    var seamImage = ctx.createImageData(width, height)
+    
+  }
+  
   function get_all_seams(weightedImage) {
     var weights = []
     
-    for (var px=0, ct=width*height*4 ;px<ct; px+=4) {
+    for (var px=0, ct=width*height*4; px<ct; px+=4) {
       weights[px] = weightedImage.data[px]
     }
     
@@ -111,12 +128,6 @@
     }
     
   }
-  
-  function highlight_seam(realImage, weightedImage) {
-    var highlight = ctx.getImageData(0, 0, realImage.width, realImage.height)
-    
-  }
-  
-  
+
 </script>
 </body></html>
