@@ -28,11 +28,20 @@
 
     var highlight_el  = document.getElementById('highlight')
     var highlight_ctx = highlight_el.getContext('2d')
-    // draw the edge detection picture
+    // draw the edge detection picture again
     highlight_ctx.putImageData(weightedImage, 0, 0)
-    // draw some seams
-    var seams = get_seams(weightedImage)
-    var seamImage = get_seam_image(seams, weightedImage)
+    // draw a seam
+    var seammap = weights_to_seammap(weightedImage)
+    var indices = get_lowest_seam(seammap)
+    var seamImage = make_seam_image(indices, weightedImage)
+    var temp_canvas = document.createElement('canvas')
+    temp_canvas.width = weightedImage.width
+    temp_canvas.height = weightedImage.height
+    var temp_ctx = temp_canvas.getContext('2d')
+    temp_ctx.putImageData(seamImage, 0, 0)
+    highlight_ctx.drawImage(temp_canvas, 0, 0)
+
+
     // highlight_ctx.putImageData(seamImage, 0, 0)
     
     // highlight = highlight_seam(imageData, weightedImage)
@@ -90,20 +99,91 @@
   }
   
   
-  function get_seams(weightedImage) {
-    var width     = weightedImage.width
-    var height    = weightedImage.height
-    var highlight = ctx.createImageData(width, height)
+  function weights_to_seammap(weightedImage) {
+    var data    = weightedImage.data
+    var width   = weightedImage.width
+    var height  = weightedImage.height
+    var seammap = new Int8Array(width * height)
+    var cumusum = new Uint32Array(width)
+    var index, first, second, third, offset, prevrowindex, currowindex, nextindex, previndex
     
+    for(var y=1; y < height; y++) {
+      prevrowindex = width * (y-1) * 4
+      for(var x=1; x < width-1; x++) {
+        index  = prevrowindex + x*4
+        previndex = index - 4
+        nextindex = index + 4
+        first  = data[previndex] <= data[index]
+        second = data[index]   <= data[nextindex]
+        if(first && second)
+          offset = -1
+        else if(!first && !second)
+          offset = 1
+        else if(!first && second)
+          offset = 0
+        else {
+          third = data[previndex] <= data[nextindex]
+          offset = third ? -1 : 1
+        }
+        
+        currowindex = x+width*y
+        cumusum[x] += data[index+offset*4]
+        seammap[currowindex] = offset
+      }
+    }
+    
+    return {map: seammap, sums: cumusum, width: width, height: height}
   }
   
-  function get_seam_image(seams, weightedImage) {
+  function get_lowest_seam(seammap) {
+    var min = Infinity
+    var index = 0
+    var sums = seammap.sums
+    var map = seammap.map
+    var width = seammap.width
+    var height = seammap.height
+    
+    // get minimum seam starting index
+    for(var i=1, l=sums.length-1; i < l; i++) {
+      if(sums[i] < min) {
+        min = sums[i]
+        index = i
+      }
+    }
+    
+    // get indices of seam from bottom to top
+    var indices = [index]
+    for(var y=height-2; y>0; y--) {
+      var offset = map[y*width+index]
+      index += offset
+      indices.push(index)
+    }
+    
+    // console.log(indices)
+    return indices
+  }
+  
+  function make_seam_image(indices, weightedImage) {
     var width     = weightedImage.width
     var height    = weightedImage.height
     var seamImage = ctx.createImageData(width, height)
+    var data = seamImage.data
     
+    // make red pixels
+    var index = 0
+    for(var y=height-1; y>0; y--, index++) {
+      var x = indices[index]
+      var pos = (y*width+x)*4
+      data[pos] = 255
+      data[pos+3] = 255
+    }
+    
+    return seamImage
   }
   
+  
+  
+  /////////////////
   function get_all_seams(weightedImage) {
     var weights = []
     
