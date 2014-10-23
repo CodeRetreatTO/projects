@@ -11,6 +11,20 @@ scoreGrid ls = map scoreLine ls
                     zipped = zip3 (head l:l) l $ tail l
                     total (a, b, c) = abs (a-b) + abs (b-c)
 
+seamsIn :: Score -> [Seam]
+seamsIn [] = []
+seamsIn s = sortByWeight allSeams
+    where allSeams = foldl line (freshSeams $ head s) $ tail s
+          line seams ln = concatMap (choose seams) $ zip [0..] ln
+          choose seams (ix, w) = map (\seam -> add seam w ix) . take 1 . sortByWeight $ potentials ix seams
+          potentials ix seams = filter (\(Seam _ (i:_)) -> i >= ix-1 && ix+1 >= i) seams
+
+scaleBy :: Image -> Int -> Image
+scaleBy pic count = head $ drop count $ iterate scaleOne pic
+    where scaleOne lns = case seamsIn $ scoreGrid lns of
+                           [] -> lns
+                           (cheapest:_) -> carveSeam lns cheapest
+
 maskSeam :: Image -> Seam -> Image
 maskSeam = applySeam (replace ' ')
 
@@ -19,20 +33,6 @@ carveSeam = applySeam remove
 
 freshSeams :: [Integer] -> [Seam]
 freshSeams ln = map (\(ix, w) -> Seam w [ix]) $ zip [1..] ln
-
-seamsIn :: Score -> [Seam]
-seamsIn [] = []
-seamsIn s = sortByWeight allSeams
-    where allSeams = foldl (\memo ln -> line ln memo) (freshSeams $ head s) $ tail s
-          line ln seams = concatMap (\(ix, w) -> choose ix w seams) $ zip [0..] ln
-          choose ix w seams = map (\seam -> add seam w ix) . take 1 . sortByWeight $ potentials ix seams
-          potentials ix seams = take 3 $ drop (max 0 (fromIntegral ix-1)) seams
-
-scaleBy :: Image -> Int -> Image
-scaleBy pic count = head $ drop count $ iterate scaleOne pic
-    where scaleOne lns = case seamsIn $ scoreGrid lns of
-                           [] -> lns
-                           (cheapest:_) -> carveSeam lns cheapest
 
 main :: IO ()
 main = do f <- fmap lines $ readFile "scene.txt"
