@@ -1,6 +1,7 @@
 module Desserts where
 
-import Data.List (nub, sort)
+import Data.Function (on)
+import Data.List (nub, sort, sortBy)
 
 type Menu = [(String, Int)]
 
@@ -16,12 +17,12 @@ addItem menu o = map (\i -> i:o) menu
 
 nextOrders menu os = concatMap (addItem menu) os
 
-allOrders m = concat $ iterate (nextOrders m) $ addItem m []
+allOrders m money = concat . takeWhile (/=[]) . map (filter ((<=money) . orderTotal)) $ iterate (nextOrders m) $ addItem m []
 
 orderTotal o = sum $ map snd o
 
 canonicalize o = sort $ map fst o
 
-filterFor menu money = nub . map canonicalize . filter ((==money) . orderTotal) $ allOrders menu
+filterFor menu money = nub . map canonicalize . filter ((==money) . orderTotal) $ allOrders menu money
 
 main money = head $ filterFor desserts money
