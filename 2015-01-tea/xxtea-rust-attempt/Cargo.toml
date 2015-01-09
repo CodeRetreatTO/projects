@@ -1,0 +1,5 @@
+[package]
+
+name = "tea"
+version = "0.0.1"
+authors = ["Aaron McLeod <aaron.mcleod@mosaic.com>"]
