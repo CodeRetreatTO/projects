@@ -4,11 +4,22 @@
 <title>XXTEA</title>
 </head><body>
 
-<p>Input string:</p>
-<p>encrypted:</p>
-<p>decrypted:</p>
+<p>Input string: <input type="text" id="input"></p>
+<p>Encrypted:</p>
+<textarea id="encrypted" rows="5" cols="80"></textarea>
+<p>Decrypted:</p>
+<textarea id="decrypted" rows="5" cols="80"></textarea>
 
 <script>
+
+var el = document.getElementById.bind(document)
+var input_el = el('input')
+input_el.addEventListener('keyup', function(e) {
+  var enc = encrypt(e.target.value)
+  var dec = decrypt(enc)
+  el('encrypted').value = enc
+  el('decrypted').value = dec
+})
 
 var DELTA = 0x9e3779b9
 var key = new Uint32Array(4)
@@ -41,17 +52,8 @@ function b64_to_utf8(str) {
     return decodeURIComponent(escape(window.atob(str)));
 }
 
-function typed_to_normal(list) {
-  var good = []
-  for (var i = 0; i < list.length; i++) {
-    good[i] = list[i]
-  }
-  return good
-}
-
-
 function arr_to_b64x(list) {
-  return typed_to_normal(list).map(utf8_to_b64).join('♡')
+  return [].slice.call(list).map(utf8_to_b64).join('♡')
 }
 
 function b64x_to_arr(string) {
@@ -60,6 +62,7 @@ function b64x_to_arr(string) {
 
 
 function btea(n, v, key) {
+  //// more or less copied from http://en.wikipedia.org/wiki/XXTEA
   var y, z, sum
   var p, rounds, e
   
@@ -97,42 +100,6 @@ function btea(n, v, key) {
   return v
 }
   
-  
-  
 </script>
 
-  void btea(uint32_t *v, int n, uint32_t const key[4]) {
-    uint32_t y, z, sum;
-    unsigned p, rounds, e;
-    if (n > 1) {          /* Coding Part */
-      rounds = 6 + 52/n;
-      sum = 0;
-      z = v[n-1];
-      do {
-        sum += DELTA;
-        e = (sum >> 2) & 3;
-        for (p=0; p<n-1; p++) {
-          y = v[p+1]; 
-          z = v[p] += (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
-        }
-        y = v[0];
-        z = v[n-1] += (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
-      } while (--rounds);
-    } else if (n < -1) {  /* Decoding Part */
-      n = -n;
-      rounds = 6 + 52/n;
-      sum = rounds*DELTA;
-      y = v[0];
-      do {
-        e = (sum >> 2) & 3;
-        for (p=n-1; p>0; p--) {
-          z = v[p-1];
-          y = v[p] -= (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
-        }
-        z = v[n-1];
-        y = v[0] -= (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
-        sum -= DELTA;
-      } while (--rounds);
-    }
-  }
 </body></html>
