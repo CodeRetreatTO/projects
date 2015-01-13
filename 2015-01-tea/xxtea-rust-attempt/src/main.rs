@@ -1,13 +1,14 @@
 extern crate tea;
+use std::str;
 
 #[cfg(not(test))]
 fn main() {
-  let value = "somestring".to_string();
-  let key: Vec<u32> = vec![223, 122, 255, 212];
-  let encrypted_value = tea::xtea::encrypt(&value, value.len(), &key);
-  println!("Encrypted: {}", encrypted_value);
-  let decrypted_value = tea::xtea::decrypt(&encrypted_value, value.len(), &key);
-
-  println!("Decrypted: {}", decrypted_value);
+  let value = vec![1u32, 2, 3, 4];
+  let key = vec![223u32, 122, 255, 212];
+  println!("Original: {:?}", value);
+  let encrypted_value = tea::xtea::encrypt(value.as_slice(), key.as_slice());
+  println!("Encrypted: {:?}", encrypted_value);
+  let decrypted_value = tea::xtea::decrypt(encrypted_value.as_slice(), key.as_slice());
+  println!("Decrypted: {:?}", decrypted_value);
 }
 

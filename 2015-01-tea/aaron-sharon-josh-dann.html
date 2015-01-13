@@ -26,12 +26,12 @@ var key = new Uint32Array(4)
 
 function encrypt(str) {
   var len = str.length
-  
+
   var v = new Uint32Array(len)
   for(var i = 0; i < len; i++) {
     v[i] = str.charCodeAt(i)
   }
-  
+
   return arr_to_b64x(btea(len, v, key))
 }
 
@@ -65,7 +65,7 @@ function btea(n, v, key) {
   //// more or less copied from http://en.wikipedia.org/wiki/XXTEA
   var y, z, sum
   var p, rounds, e
-  
+
   if (n > 1) {          /* Coding Part */
     rounds = Math.floor(6 + 52/n)
     sum = 0
@@ -96,10 +96,10 @@ function btea(n, v, key) {
       sum -= DELTA;
     }
   }
-  
+
   return v
 }
-  
+
 </script>
 
 </body></html>
