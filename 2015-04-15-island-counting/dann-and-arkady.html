@@ -1,0 +1,112 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style></style>
+</head><body>
+
+<canvas id="can"></canvas>
+
+<script>
+  grid = []
+  
+  function count(grid) {
+    var w = grid.length
+    var h = grid[0].length
+    var counter = 0
+    var last_flag = false
+    var done_flag = false
+    
+    while(true) {      
+      var p = get_point(w, h) // ES6 dereferencing
+      var x = p[0], y = p[1]
+
+      if(!grid[x][y]) continue
+      if(!can_sink(x, y, grid)) continue // maybe try breaking
+
+      if(last_land) last_flag = true
+      sink(x, y, grid)
+        
+      if(last_flag) {
+        counter++
+        last_land = false
+        if(done(grid)) break
+      }
+    }
+    
+    return count
+  }
+
+  function get_point(w, h) {
+    var x = Math.floor(Math.random() * w)
+    var y = Math.floor(Math.random() * h)
+    return [x, y]
+  }
+
+  function sink(x, y, grid) {
+    grid[x][y] = 0
+  }
+  
+  function can_sink(x, y, grid) {
+    var square = copy_square(x, y, grid)
+    for(var i = 0; i <= 2; i++)
+      for(var j = 0; j <= 2; j++)
+        if(square[i][j]) {
+          square = flood(i, j, square)
+          return done(square)
+        }
+    
+    return true
+  }
+  
+  function flood(x, y, grid) {
+    var stack = [[x,y]]
+    while(stack.length) {
+      var p = stack.pop()
+      grid[p[0], p[1]] = 0
+      
+      for(var i = -1; i <= 1; i++)
+        for(var j = -1; j <= 1; j++)
+          if(grid[sanitize(p[0]+i)][sanitize(p[1]+j)])
+            stack.push([sanitize(p[0]+i), sanitize(p[1]+j)])
+    }
+    
+    return grid
+  }
+  
+  function sanitize(val, min, max) {
+    return Math.max(min||0, Math.min(max||2, val))
+  }
+  
+  function copy_square(x, y, grid) {
+    var x = []
+    var square = [[],[],[]]
+    for(var i = -1; i <= 1; i++)
+      for(var j = -1; j <= 1; j++)
+        square[sanitize(i+1)][sanitize(j+1)] = grid[sanitize(x+i)][sanitize(y+j)]
+    
+    square[1][1] = 0
+    return square
+  }
+  
+  function last_land(x, y, grid) {
+    for(var i = -1; i <= 1; i++)
+      for(var j = -1; j <= 1; j++)
+        if( (i || j) && grid[sanitize(x+i)][sanitize(y+j)]) 
+          return false
+
+    return true
+  }
+
+  function done(grid) {
+    for(var x = 0; x < grid.length; x++)
+      for(var y = 0; y < grid[0].length; y++)
+        if(grid[x][y]) return false
+    
+    return true
+  }
+  
+  function draw(grid) {
+    
+  }
+  
+</script>
+</body></html>
