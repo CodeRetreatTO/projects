@@ -3,21 +3,8 @@ module IslandCounting where
 type Coord = (Int, Int)
 type Grid = [Coord]
 
-testStrings :: [String]
-testStrings = [ "......."
-              , ".xx...."
-              , "xxxx..."
-              , ".xx...."
-              , "....xx."
-              , "...xxx."
-              , "....x.."
-              , "......."]
-
 testGrid :: Grid
 testGrid = [(0, 3), (0, 4), (0, 5), (16, 12)]
-
--- toGrid :: [String] -> Grid
--- toGrid ss = 
 
 countIslands :: Grid -> Int
 countIslands [] = 0
@@ -35,8 +22,5 @@ ablate g c = if c `elem` g
           removed = filter (/=c) g
 
 neighbors :: Coord -> [Coord]
-neighbors (x, y) = [ (x-1, y-1), (x, y-1), (x+1, y-1)
-                   , (x-1, y),             (x+1, y)
-                   , (x-1, y+1), (x, y+1), (x+1, y+1)]
-
--- [(x'+x, y'+y) | x' <- [-1,0,1], y'<-[-1,0,1], (x',y') /= (0,0)]
+neighbors (x, y) = [(x'+x, y'+y) | x' <- off, y' <- off, (x',y') /= (0,0)]
+    where off = [-1,0,1]
