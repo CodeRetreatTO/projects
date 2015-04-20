@@ -134,7 +134,7 @@
   function last_land(x, y, grid) {
     for(var i = -1; i <= 1; i++)
       for(var j = -1; j <= 1; j++)
-        if( (i || j) && grid[crop(x+i)][crop(y+j)]) 
+        if( (i || j) && fix(grid, x+i, y+j)) 
           return false
 
     return true
@@ -168,7 +168,7 @@
   }
   
   function drawgrid(grid, ctx, scale) {
-    var scale = scale || 5
+    var scale = scale || 10
     var fun = function(val, x, y) {
       ctx.fillStyle = val ? '#00CC33' : '#333399'
       return !ctx.fillRect(x*scale, y*scale, scale, scale)
@@ -178,7 +178,7 @@
   }
   
   function drawspot(grid, ctx, x, y, scale) {
-    var scale = scale || 5
+    var scale = scale || 10
     var hue = 0
     var sat = 70 + rand(20)
     var lit = 50 + rand(20)
