@@ -16,12 +16,18 @@
     var counter = 0
     var last_flag = false
     
-    while(true) {      
+    // while(!loop()) {}
+    setTimeout(function looper() {
+      if(!loop()) setTimeout(looper, 0)
+      else console.log(counter)
+    }, 0)
+
+    function loop() {
       var p = get_point(w, h) // ES6 dereferencing
       var x = p[0], y = p[1]
 
-      if(!grid[x][y]) continue
-      if(!can_sink(x, y, grid)) continue // maybe try breaking
+      if(!grid[x][y]) return false
+      if(!can_sink(x, y, grid)) return false // maybe try breaking
 
       if(last_land) last_flag = true
       sink(x, y, grid)
@@ -31,13 +37,13 @@
       if(last_flag) {
         counter++
         last_land = false
-        if(done(grid)) break
+        if(done(grid)) return true
       }
     }
     
     return counter
   }
-
+  
   function get_point(w, h) {
     var x = Math.floor(Math.random() * w)
     var y = Math.floor(Math.random() * h)
