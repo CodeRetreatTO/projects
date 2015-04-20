@@ -3,7 +3,7 @@
 <style></style>
 </head><body>
 
-<canvas id="can"></canvas>
+<canvas id="can" width="500" height="500"></canvas>
 
 <script>
   grid = []
@@ -27,15 +27,18 @@
       var p = get_point(w, h) // ES6 dereferencing
       var x = p[0], y = p[1]
 
+      drawspot(grid, ctx, x, y)
+      
       if(!grid[x][y]) return false
       if(!can_sink(x, y, grid)) return false // maybe try breaking
 
       if(last_land(x, y, grid)) 
         last_flag = true
+      
       sink(x, y, grid)
       counter++
       
-      draw(grid, ctx)
+      drawgrid(grid, ctx)
       
       if(last_flag) {
         islands++
@@ -114,14 +117,20 @@
     return true
   }
   
-  function draw(grid, ctx) {
-    var scale = 5
+  function drawgrid(grid, ctx, scale) {
+    var scale = scale || 5
     var fun = function(val, x, y) {
       ctx.fillStyle = val ? 'green' : 'blue'
       return !ctx.fillRect(x*scale, y*scale, scale, scale)
     }
     
     doeach(grid, fun)
+  }
+  
+  function drawspot(grid, ctx, x, y, scale) {
+    var scale = scale || 5
+    ctx.fillStyle = 'red'
+    ctx.fillRect(x*scale, y*scale, scale, scale)
   }
   
   function doeach(grid, fun) {
