@@ -61,7 +61,7 @@
     var stack = [[x,y]]
     while(stack.length) {
       var p = stack.pop()
-      grid[p[0], p[1]] = 0
+      grid[p[0]][p[1]] = 0
       
       for(var i = -1; i <= 1; i++)
         for(var j = -1; j <= 1; j++)
