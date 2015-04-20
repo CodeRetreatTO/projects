@@ -7,7 +7,8 @@
 <button id="tryme">Try me</button>
 
 <script>
-  grid = []
+  document.getElementById('tryme').addEventListener('click', function() {count(makegrid(40, 40))})
+
   var cancan = document.getElementById('can')
   var ctx = cancan.getContext('2d')
   
@@ -177,7 +178,7 @@
   function drawgrid(grid, ctx, scale) {
     var scale = scale || 10
     var fun = function(val, x, y) {
-      ctx.fillStyle = val ? '#00CC33' : '#333399'
+      setfill(val ? '#00CC33' : '#333399')
       return !ctx.fillRect(x*scale, y*scale, scale, scale)
     }
     
@@ -186,18 +187,26 @@
   
   function drawspot(grid, ctx, x, y, scale) {
     var scale = scale || 10
-    var hue = 0
-    var sat = 70 + rand(20)
-    var lit = 50 + rand(20)
-    var color = 'hsla(' + hue + ', ' + sat + '%, ' + lit + '%, 0.8)'
-    ctx.fillStyle = color
+    // var hue = 0
+    // var sat = 70 + rand(20)
+    // var lit = 50 + rand(20)
+    // var color = 'hsla(' + hue + ', ' + sat + '%, ' + lit + '%, 0.8)'
+    setfill('hsla(0, 90%, 60%, 0.8)')
     ctx.fillRect(x*scale, y*scale, scale, scale)
   }
   
+  ~function() {
+    var current = ''
+    setfill = function(color) {
+      if(color == current) return false
+      current = color
+      ctx.fillStyle = color
+    }
+  }()
+  
   function rand(n) { return Math.floor(Math.random() * (n+1)) }
   
-  var button = document.getElementById('tryme')
-  button.addEventListener('click', function() {count(makegrid(40, 40))})
+
   
   
   // GO FASTER
