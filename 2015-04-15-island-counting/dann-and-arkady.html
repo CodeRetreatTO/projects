@@ -91,7 +91,7 @@
   
   function walk(x, y, grid) {
     var dirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]]
-    var dir = 0
+    var dir = rand(8)
     var visited = []
     var startx = x, starty = y
     loop: while(true) {
@@ -100,11 +100,17 @@
         var dx = offset[0], dy = offset[1]
         if(!fix(grid, x+dx, y+dy)) continue
         if(visited.indexOf(""+[x+dx,y+dy]) != -1) continue
+        if(x+dx == startx && y+dy == starty && visited.length < 3) continue
         x = x+dx
         y = y+dy
-        dir = i
+        dir = rand(8)
         visited.push(""+[x,y])
-        if(x == startx && y == starty) return true // it's a cycle
+        if(x == startx && y == starty) {
+          var square = copy_square(x, y, grid)
+          return doeach(square, function(val, i, j) {
+            return !(val && (!~visited.indexOf(""+[x+i-1,y+j-1]))) // this doesn't prove it's not a cycle, but true is true
+          })
+        }
         continue loop
       }
       return false
@@ -182,7 +188,8 @@
     var hue = 0
     var sat = 70 + rand(20)
     var lit = 50 + rand(20)
-    ctx.fillStyle = 'hsl(' + hue + ', ' + sat + '%, ' + lit + '%)'
+    var color = 'hsla(' + hue + ', ' + sat + '%, ' + lit + '%, 0.8)'
+    ctx.fillStyle = color
     ctx.fillRect(x*scale, y*scale, scale, scale)
   }
   
