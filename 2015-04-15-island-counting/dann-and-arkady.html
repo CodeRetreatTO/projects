@@ -4,6 +4,7 @@
 </head><body>
 
 <canvas id="can" width="500" height="500"></canvas>
+<button id="tryme">Try me</button>
 
 <script>
   grid = []
@@ -18,10 +19,10 @@
     var last_flag = false
     
     // while(!loop()) {}
-    setTimeout(function looper() {
-      if(!loop()) setTimeout(looper, 0)
+    setImmediate(function looper() {
+      if(!loop()) setImmediate(looper)
       else console.log(islands + ' islands, ' + counter + ' total land')
-    }, 0)
+    })
 
     function loop() {
       var p = get_point(w, h) // ES6 dereferencing
@@ -194,6 +195,50 @@
   }
   
   function rand(n) { return Math.floor(Math.random() * (n+1)) }
+  
+  var button = document.getElementById('tryme')
+  button.addEventListener('click', function() {count(makegrid(40, 40))})
+  
+  
+  // GO FASTER
+  
+  ~function() {
+    //// postpone until next tick
+    // inspired by http://dbaron.org/log/20100309-faster-timeouts
+    var later = []
+    var messageName = 12345
+    var gimme_a_tick = true
+
+    setImmediate = function(fun) {
+      later.push(fun)
+
+      if(gimme_a_tick) {
+        gimme_a_tick = false
+        window.postMessage(messageName, "*")
+      }
+      
+      return false
+    }
+
+    var handleMessage = function(event) {
+      if(event.data != messageName) return false
+
+        event.stopPropagation()
+        gimme_a_tick = true
+
+        var now = later
+        later = []
+
+        for(var i=0, l=now.length; i < l; i++)
+          now[i]()
+    }
+      
+    if(typeof window != 'undefined') {
+      window.addEventListener('message', handleMessage, true)
+    }
+  }()
+  
+  
   
 </script>
 </body></html>
