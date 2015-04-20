@@ -117,22 +117,6 @@
     return true
   }
   
-  function drawgrid(grid, ctx, scale) {
-    var scale = scale || 5
-    var fun = function(val, x, y) {
-      ctx.fillStyle = val ? 'green' : 'blue'
-      return !ctx.fillRect(x*scale, y*scale, scale, scale)
-    }
-    
-    doeach(grid, fun)
-  }
-  
-  function drawspot(grid, ctx, x, y, scale) {
-    var scale = scale || 5
-    ctx.fillStyle = 'red'
-    ctx.fillRect(x*scale, y*scale, scale, scale)
-  }
-  
   function doeach(grid, fun) {
     for(var x = 0; x < grid.length; x++)
       for(var y = 0; y < grid[0].length; y++)
@@ -146,11 +130,32 @@
     for(var y = 0; y < h; y++) {
       grid[y] = []
       for(var x = 0; x < w; x++) {
-        grid[y][x] = Math.floor(Math.random()*2)
+        grid[y][x] = rand(1)
       }
     }
     return grid
   }
+  
+  function drawgrid(grid, ctx, scale) {
+    var scale = scale || 5
+    var fun = function(val, x, y) {
+      ctx.fillStyle = val ? '#00CC33' : '#333399'
+      return !ctx.fillRect(x*scale, y*scale, scale, scale)
+    }
+    
+    doeach(grid, fun)
+  }
+  
+  function drawspot(grid, ctx, x, y, scale) {
+    var scale = scale || 5
+    var hue = 0
+    var sat = 70 + rand(20)
+    var lit = 50 + rand(20)
+    ctx.fillStyle = 'hsl(' + hue + ', ' + sat + '%, ' + lit + '%)'
+    ctx.fillRect(x*scale, y*scale, scale, scale)
+  }
+  
+  function rand(n) { return Math.floor(Math.random() * (n+1)) }
   
 </script>
 </body></html>
