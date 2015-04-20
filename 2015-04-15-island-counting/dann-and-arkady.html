@@ -13,13 +13,14 @@
   function count(grid) {
     var w = grid.length
     var h = grid[0].length
+    var islands = 0
     var counter = 0
     var last_flag = false
     
     // while(!loop()) {}
     setTimeout(function looper() {
       if(!loop()) setTimeout(looper, 0)
-      else console.log(counter)
+      else console.log(islands + ' islands, ' + counter + ' total land')
     }, 0)
 
     function loop() {
@@ -29,19 +30,19 @@
       if(!grid[x][y]) return false
       if(!can_sink(x, y, grid)) return false // maybe try breaking
 
-      if(last_land) last_flag = true
+      if(last_land(x, y, grid)) 
+        last_flag = true
       sink(x, y, grid)
+      counter++
       
       draw(grid, ctx)
       
       if(last_flag) {
-        counter++
-        last_land = false
+        islands++
+        last_flag = false
         if(done(grid)) return true
       }
     }
-    
-    return counter
   }
   
   function get_point(w, h) {
