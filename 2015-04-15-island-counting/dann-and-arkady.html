@@ -62,11 +62,12 @@
     var square = copy_square(x, y, grid)
     square[1][1] = 0
 
-    for(var i = 0; i <= 2; i++)
+    for(var i = 0; i <= 2; i++) // stage one: scan and flood
       for(var j = 0; j <= 2; j++)
         if(square[i][j]) {
           square = flood(i, j, square)
-          return done(square)
+          if(done(square)) return true
+          return walk(x, y, grid) // stage two: go for a walk
         }
     
     return true
@@ -86,6 +87,29 @@
     }
     
     return grid
+  }
+  
+  function walk(x, y, grid) {
+    var dirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]]
+    var dir = 0
+    var visited = []
+    var startx = x, starty = y
+    loop: while(true) {
+      for (var i = 0; i < dirs.length; i++) {
+        var offset = dirs[(dir+i)%8]
+        var dx = offset[0], dy = offset[1]
+        if(!fix(grid, x+dx, y+dy)) continue
+        if(visited.indexOf(""+[x+dx,y+dy]) != -1) continue
+        x = x+dx
+        y = y+dy
+        dir = i
+        visited.push(""+[x,y])
+        if(x == startx && y == starty) return true // it's a cycle
+        continue loop
+      }
+      return false
+    }
+    return false 
   }
   
   function crop(val, min, max) {
