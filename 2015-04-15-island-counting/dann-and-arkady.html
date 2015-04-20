@@ -7,13 +7,14 @@
 
 <script>
   grid = []
+  var cancan = document.getElementById('can')
+  var ctx = cancan.getContext('2d')
   
   function count(grid) {
     var w = grid.length
     var h = grid[0].length
     var counter = 0
     var last_flag = false
-    var done_flag = false
     
     while(true) {      
       var p = get_point(w, h) // ES6 dereferencing
@@ -24,7 +25,9 @@
 
       if(last_land) last_flag = true
       sink(x, y, grid)
-        
+      
+      draw(grid, ctx)
+      
       if(last_flag) {
         counter++
         last_land = false
@@ -32,7 +35,7 @@
       }
     }
     
-    return count
+    return counter
   }
 
   function get_point(w, h) {
@@ -65,14 +68,14 @@
       
       for(var i = -1; i <= 1; i++)
         for(var j = -1; j <= 1; j++)
-          if(grid[sanitize(p[0]+i)][sanitize(p[1]+j)])
-            stack.push([sanitize(p[0]+i), sanitize(p[1]+j)])
+          if(grid[crop(p[0]+i)][crop(p[1]+j)])
+            stack.push([crop(p[0]+i), crop(p[1]+j)])
     }
     
     return grid
   }
   
-  function sanitize(val, min, max) {
+  function crop(val, min, max) {
     return Math.max(min||0, Math.min(max||2, val))
   }
   
@@ -81,7 +84,7 @@
     var square = [[],[],[]]
     for(var i = -1; i <= 1; i++)
       for(var j = -1; j <= 1; j++)
-        square[sanitize(i+1)][sanitize(j+1)] = grid[sanitize(x+i)][sanitize(y+j)]
+        square[crop(i+1)][crop(j+1)] = grid[crop(x+i)][crop(y+j)]
     
     square[1][1] = 0
     return square
@@ -90,7 +93,7 @@
   function last_land(x, y, grid) {
     for(var i = -1; i <= 1; i++)
       for(var j = -1; j <= 1; j++)
-        if( (i || j) && grid[sanitize(x+i)][sanitize(y+j)]) 
+        if( (i || j) && grid[crop(x+i)][crop(y+j)]) 
           return false
 
     return true
@@ -104,8 +107,33 @@
     return true
   }
   
-  function draw(grid) {
+  function draw(grid, ctx) {
+    var scale = 5
+    var fun = function(val, x, y) {
+      ctx.fillStyle = val ? 'green' : 'blue'
+      return !ctx.fillRect(x*scale, y*scale, scale, scale)
+    }
     
+    doeach(grid, fun)
+  }
+  
+  function doeach(grid, fun) {
+    for(var x = 0; x < grid.length; x++)
+      for(var y = 0; y < grid[0].length; y++)
+        if(!fun(grid[x][y], x, y, grid)) return false
+
+    return true
+  }
+  
+  function makegrid(w, h) {
+    var grid = []
+    for(var y = 0; y < h; y++) {
+      grid[y] = []
+      for(var x = 0; x < w; x++) {
+        grid[y][x] = Math.floor(Math.random()*2)
+      }
+    }
+    return grid
   }
   
 </script>
