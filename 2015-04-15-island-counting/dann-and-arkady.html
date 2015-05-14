@@ -1,0 +1,253 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style></style>
+</head><body>
+
+<canvas id="can" width="500" height="500"></canvas>
+<button id="tryme">Try me</button>
+
+<script>
+  document.getElementById('tryme').addEventListener('click', function() {count(makegrid(40, 40))})
+
+  var cancan = document.getElementById('can')
+  var ctx = cancan.getContext('2d')
+  
+  function count(grid) {
+    var w = grid.length
+    var h = grid[0].length
+    var islands = 0
+    var counter = 0
+    var last_flag = false
+    
+    // while(!loop()) {}
+    setImmediate(function looper() {
+      if(!loop()) setImmediate(looper)
+      else console.log(islands + ' islands, ' + counter + ' total land')
+    })
+
+    function loop() {
+      var p = get_point(w, h) // ES6 dereferencing
+      var x = p[0], y = p[1]
+
+      drawspot(grid, ctx, x, y)
+      
+      if(!grid[x][y]) return false
+      if(!can_sink(x, y, grid)) return false // maybe try breaking
+
+      if(last_land(x, y, grid)) 
+        last_flag = true
+      
+      sink(x, y, grid)
+      counter++
+      
+      drawgrid(grid, ctx)
+      
+      if(last_flag) {
+        islands++
+        last_flag = false
+        if(done(grid)) return true
+      }
+    }
+  }
+  
+  function get_point(w, h) {
+    var x = Math.floor(Math.random() * w)
+    var y = Math.floor(Math.random() * h)
+    return [x, y]
+  }
+
+  function sink(x, y, grid) {
+    grid[x][y] = 0
+  }
+  
+  function can_sink(x, y, grid) {
+    var square = copy_square(x, y, grid)
+    square[1][1] = 0
+
+    for(var i = 0; i <= 2; i++) // stage one: scan and flood
+      for(var j = 0; j <= 2; j++)
+        if(square[i][j]) {
+          square = flood(i, j, square)
+          if(done(square)) return true
+          return walk(x, y, grid) // stage two: go for a walk
+        }
+    
+    return true
+  }
+  
+  function flood(x, y, grid) {
+    var stack = [[x,y]]
+    while(stack.length) {
+      var p = stack.pop()
+      var x = p[0], y = p[1]
+      grid[x][y] = 0
+      
+      for(var i = -1; i <= 1; i++)
+        for(var j = -1; j <= 1; j++)
+          if(fix(grid, x+i, y+j))
+            stack.push([x+i, y+j])
+    }
+    
+    return grid
+  }
+  
+  function walk(x, y, grid) {
+    var dirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]]
+    var dir = rand(8)
+    var visited = []
+    var startx = x, starty = y
+    loop: while(true) {
+      for (var i = 0; i < dirs.length; i++) {
+        var offset = dirs[(dir+i)%8]
+        var dx = offset[0], dy = offset[1]
+        if(!fix(grid, x+dx, y+dy)) continue
+        if(visited.indexOf(""+[x+dx,y+dy]) != -1) continue
+        if(x+dx == startx && y+dy == starty && visited.length < 3) continue
+        x = x+dx
+        y = y+dy
+        dir = rand(8)
+        visited.push(""+[x,y])
+        if(x == startx && y == starty) {
+          var square = copy_square(x, y, grid)
+          return doeach(square, function(val, i, j) {
+            return !(val && (!~visited.indexOf(""+[x+i-1,y+j-1]))) // this doesn't prove it's not a cycle, but true is true
+          })
+        }
+        continue loop
+      }
+      return false
+    }
+    return false 
+  }
+  
+  function crop(val, min, max) {
+    return Math.max(min||0, Math.min(max||2, val))
+  }
+  
+  function fix(grid, x, y) {
+    var row = grid[x]
+    if(!row) return 0
+    return row[y] || 0
+  }
+  
+  function copy_square(x, y, grid) {
+    var square = [[],[],[]]
+    for(var i = -1; i <= 1; i++)
+      for(var j = -1; j <= 1; j++)
+        square[crop(i+1)][crop(j+1)] = fix(grid, x+i, y+j)
+    
+    return square
+  }
+  
+  function last_land(x, y, grid) {
+    for(var i = -1; i <= 1; i++)
+      for(var j = -1; j <= 1; j++)
+        if( (i || j) && fix(grid, x+i, y+j)) 
+          return false
+
+    return true
+  }
+
+  function done(grid) {
+    for(var x = 0; x < grid.length; x++)
+      for(var y = 0; y < grid[0].length; y++)
+        if(grid[x][y]) return false
+    
+    return true
+  }
+  
+  function doeach(grid, fun) {
+    for(var x = 0; x < grid.length; x++)
+      for(var y = 0; y < grid[0].length; y++)
+        if(!fun(grid[x][y], x, y, grid)) return false
+
+    return true
+  }
+  
+  function makegrid(w, h) {
+    var grid = []
+    for(var y = 0; y < h; y++) {
+      grid[y] = []
+      for(var x = 0; x < w; x++) {
+        grid[y][x] = rand(1)
+      }
+    }
+    return grid
+  }
+  
+  function drawgrid(grid, ctx, scale) {
+    var scale = scale || 10
+    var fun = function(val, x, y) {
+      setfill(val ? '#00CC33' : '#333399')
+      return !ctx.fillRect(x*scale, y*scale, scale, scale)
+    }
+    
+    doeach(grid, fun)
+  }
+  
+  function drawspot(grid, ctx, x, y, scale) {
+    var scale = scale || 10
+    // var hue = 0
+    // var sat = 70 + rand(20)
+    // var lit = 50 + rand(20)
+    // var color = 'hsla(' + hue + ', ' + sat + '%, ' + lit + '%, 0.8)'
+    setfill('hsla(0, 90%, 60%, 0.8)')
+    ctx.fillRect(x*scale, y*scale, scale, scale)
+  }
+  
+  ~function() {
+    var current = ''
+    setfill = function(color) {
+      if(color == current) return false
+      current = color
+      ctx.fillStyle = color
+    }
+  }()
+  
+  function rand(n) { return Math.floor(Math.random() * (n+1)) }
+  
+
+  
+  
+  // GO FASTER
+  
+  ~function() {
+    //// postpone until next tick
+    // inspired by http://dbaron.org/log/20100309-faster-timeouts
+    var later = []
+    var messageName = 12345
+    var gimme_a_tick = true
+
+    setImmediate = function(fun) {
+      later.push(fun)
+
+      if(gimme_a_tick) {
+        gimme_a_tick = false
+        window.postMessage(messageName, "*")
+      }
+      
+      return false
+    }
+
+    var handleMessage = function(event) {
+      if(event.data != messageName) return false
+
+        event.stopPropagation()
+        gimme_a_tick = true
+
+        var now = later
+        later = []
+
+        for(var i=0, l=now.length; i < l; i++)
+          now[i]()
+    }
+      
+    if(typeof window != 'undefined') {
+      window.addEventListener('message', handleMessage, true)
+    }
+  }()
+  
+  
+  
+</script>
+</body></html>
