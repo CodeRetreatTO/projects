@@ -2,12 +2,10 @@ module Anagrams where
 
 import Data.Function (on)
 import Data.Maybe (catMaybes)
-import Data.List (subsequences, sortBy)
+import Data.List (sortBy)
 import Data.Vector (Vector)
 import qualified Data.Vector as Vec
 import qualified Data.Char as Chr
-
--- import qualified Debug.Trace as Dbg
 
 type Gram = Vector Int
 type Entry = String
@@ -15,7 +13,8 @@ type Dictionary = [Entry]
 
 dict :: IO Dictionary
 dict = fmap break $ readFile "/usr/share/dict/american-english"
-    where break = sortBy (flip compare `on` length) . lines
+    where break = sortBy (flip compare `on` length) . filter ((>2) . length) . lines
+                  
 
 empty :: Gram
 empty = Vec.replicate 26 0
