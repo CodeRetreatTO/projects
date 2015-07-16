@@ -9,8 +9,8 @@ function init() {
     ctx.clearRect(0, 0, 1000, 1000);
 }
 
-var WIDTH=20;
-var HEIGHT=20;
+var WIDTH=10;
+var HEIGHT=10;
 function drawTriangle(x, y) {
     var path=new Path2D();
     path.moveTo(x, y);
@@ -19,7 +19,8 @@ function drawTriangle(x, y) {
     ctx.fill(path);
 }
 
-var state=[[0,0],[20,0],[10,20]];
+//var state=[[0,0],[WIDTH,0],[WIDTH/2,HEIGHT]];
+var state = [0,0];
 
 
 function treeCopy(tree, dx, dy) {
