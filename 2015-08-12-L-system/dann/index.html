@@ -1,11 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>L-systems</title>
-    </head>
-    <body>
-        <canvas id="can" height="1200" width="1200"></canvas>
-        <script src="main.js"></script>
-    </body>
+  <head>
+    <meta charset="utf-8">
+    <title>L-systems</title>
+    <style>
+      #menu {
+        width: 100px;
+        float: left;
+      }
+      label {
+        width: 300px
+      }
+      canvas {
+        float: right
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu">
+      <p><label>start</label> <input name="start" id="start" type="text" value="a" /></p>
+      <p><label>rule1</label> <input name="rule1" id="rule1" type="text" value="a -> +b-a-b+" /></p>
+      <p><label>rule2</label> <input name="rule2" id="rule2" type="text" value="b -> -a+b+a-" /></p>
+      <p><label>rule3</label> <input name="rule3" id="rule3" type="text" value="" /></p>
+      <p><label>rule4</label> <input name="rule4" id="rule4" type="text" value="" /></p>
+      <p><label>rule5</label> <input name="rule5" id="rule5" type="text" value="" /></p>
+      <p><label>angle</label> <input name="angle" id="angle" type="text" value="60" /></p>
+      <p><label>size</label>  <input name="size"  id="size" type="text" value="3" /></p>
+      <p><label>iterations</label><input name="iterations" id="iterations" type="text" value="8" /></p>
+    </div>
+    <canvas id="can" height="800" width="800"></canvas>
+    <script src="main.js"></script>
+  </body>
 </html>
