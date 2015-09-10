@@ -37,9 +37,9 @@ relevant w dict = filter (fits w . decode) dict
 ana :: String -> Dictionary -> [String]
 ana word dict = catMaybes $ recur [] gram $ relevant gram dict
     where gram = decode word
+          recur _ _ [] = [Nothing]
           recur acc gram dict
               | empty == gram = [Just . unwords $ reverse acc]
-              | [] == dict = [Nothing]
               | otherwise = concatMap next dict
                 where next w = let rem = remove gram $ decode w
                                in recur (w:acc) rem $ relevant rem dict
