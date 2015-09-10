@@ -14,7 +14,7 @@ var ops = {
 }
 
 $repl.addEventListener('input', function (ev) {
-    process(tokens(ev.target.value))
+    doStuff(ev.target.value)
 })
 
 function tokens(string) {
@@ -35,7 +35,7 @@ function step(token, q, stack) {
 	    var newStack = stack.slice(0, -1)
 	    var two = ops[op].fn.length
 	    var elems = q.slice(-two)
-	    var result = ops[op].fn.apply(null, elems)
+	    var result = ops[op].fn.apply(null, elems) // [[op].concat(elems)]
 	    var newQ = q.slice(0, -two).concat(result)
 	    return step(token, newQ, newStack)
 	}
@@ -48,4 +48,12 @@ function process(toks) {
     }, {q: [], stack: []})
     $q.innerHTML = JSON.stringify(res.q)
     $stack.innerHTML = JSON.stringify(res.stack)
+}
+
+function doStuff(str) {
+    process(tokens(str))
+}
+
+if ($repl.value) {
+    doStuff($repl.value)
 }
