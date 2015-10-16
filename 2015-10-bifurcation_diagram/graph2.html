@@ -1,0 +1,60 @@
+<DOCTYPE! html>
+  <html>
+    <head>
+	    <title>asdf</title>
+    </head>
+  
+  <body>
+    <canvas id="canvas" width="600" height="600"></canvas>
+
+	  <script>
+      var el = document.getElementById('canvas')
+      var ctx = el.getContext('2d')
+
+      var start = 2.4
+      var end = 4.0
+      var width = 600
+
+      function draw_pixel(x, y) {
+        ctx.fillRect(x, y, 1, 1)
+      }
+
+      var xProj = function (x) {
+        return (x - start) * width / (end - start)
+      }
+
+      var yProj = function (y) {
+        return 600 * (1 - y)
+      }
+
+      var iterate = function (r) {
+        var list = []
+        var x = 0.5
+        for(var i=0; i < 100; i++) {
+          list.push(x)
+          x = r * x * (1 - x)
+        }
+
+        return list
+      }
+
+
+      function main() {
+        for (var r = start; r < 4; r+=0.0005) {
+          var list = iterate(r)
+          list.forEach(function(item, index) {
+            var color = "hsla(" + Math.floor(index*1000000)%360 + ",80%,80%,0.1)"
+            ctx.fillStyle = color
+            draw_pixel(xProj(r), yProj(item))
+          }) 
+        }
+      }
+
+      main()
+
+	  </script>
+
+  This is graph of the formula  " X_n+1 = r * X_n * (1 - x_n)"
+
+  </body>
+</html>
