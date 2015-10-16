@@ -1,0 +1,105 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style></style>
+<title>XXTEA</title>
+</head><body>
+
+<p>Input string: <input type="text" id="input"></p>
+<p>Encrypted:</p>
+<textarea id="encrypted" rows="5" cols="80"></textarea>
+<p>Decrypted:</p>
+<textarea id="decrypted" rows="5" cols="80"></textarea>
+
+<script>
+
+var el = document.getElementById.bind(document)
+var input_el = el('input')
+input_el.addEventListener('keyup', function(e) {
+  var enc = encrypt(e.target.value)
+  var dec = decrypt(enc)
+  el('encrypted').value = enc
+  el('decrypted').value = dec
+})
+
+var DELTA = 0x9e3779b9
+var key = new Uint32Array(4)
+
+function encrypt(str) {
+  var len = str.length
+
+  var v = new Uint32Array(len)
+  for(var i = 0; i < len; i++) {
+    v[i] = str.charCodeAt(i)
+  }
+
+  return arr_to_b64x(btea(len, v, key))
+}
+
+function decrypt(v) {
+  v = b64x_to_arr(v)
+  var n = -1 * v.length
+
+  var plainints = btea(n, v, key)
+  return String.fromCharCode.apply(null, plainints)
+}
+
+
+function utf8_to_b64(str) {
+    return window.btoa(unescape(encodeURIComponent(str)));
+}
+
+function b64_to_utf8(str) {
+    return decodeURIComponent(escape(window.atob(str)));
+}
+
+function arr_to_b64x(list) {
+  return [].slice.call(list).map(utf8_to_b64).join('♡')
+}
+
+function b64x_to_arr(string) {
+  return new Uint32Array(string.split('♡').map(b64_to_utf8).map(parseFloat))
+}
+
+
+function btea(n, v, key) {
+  //// more or less copied from http://en.wikipedia.org/wiki/XXTEA
+  var y, z, sum
+  var p, rounds, e
+
+  if (n > 1) {          /* Coding Part */
+    rounds = Math.floor(6 + 52/n)
+    sum = 0
+    z = v[n-1]
+    while(rounds--) {
+      sum += DELTA
+      e = (sum >> 2) & 3
+      for (p=0; p<n-1; p++) {
+        y = v[p+1]
+        z = v[p] += (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)))
+      }
+      y = v[0]
+      z = v[n-1] += (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)))
+    }
+  } else if (n < -1) {  /* Decoding Part */
+    n = -n;
+    rounds = Math.floor(6 + 52/n)
+    sum = rounds*DELTA;
+    y = v[0];
+    while(rounds--) {
+      e = (sum >> 2) & 3;
+      for (p=n-1; p>0; p--) {
+        z = v[p-1];
+        y = v[p] -= (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
+      }
+      z = v[n-1];
+      y = v[0] -= (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z)));
+      sum -= DELTA;
+    }
+  }
+
+  return v
+}
+
+</script>
+
+</body></html>
