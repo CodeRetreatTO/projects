@@ -1,0 +1,40 @@
+<!DOCTYPE>
+<html>
+<script type="text/javascript">
+    //Finding minimal 1D projection of a 2D figure (finding maximum line which can fit in the figure is missing)
+	var points = [
+		{x:1, y:1}, 
+		{x:2, y:4}, 
+		{x:3, y:5},
+		{x:5, y:7},
+		{x:2, y:9}
+	];
+
+	function x_rotate(point, angle) {		
+		return point.x * Math.cos(angle) - point.y * Math.sin(angle);
+	} 
+
+	function project(shape, angle) {
+		var max = -Infinity;
+		var min = Infinity;
+		for (var j = 0; j < shape.length; j ++) {
+			var x = x_rotate(shape[j], angle);
+			max = Math.max(max, x);
+			min = Math.min(min, x);
+		}
+
+		return max - min;
+	}
+
+	function minProfile(shape) {
+		var distance = Infinity;
+		var delta = 1;
+		for (var i = 0; i < 360; i += delta) {
+			var currDistance = project(shape, i);
+			distance = Math.min(currDistance, distance);
+		}
+		return distance;
+	}
+	//for (var i = 0; i < shape.length; i++)
+</script>
+</html>
