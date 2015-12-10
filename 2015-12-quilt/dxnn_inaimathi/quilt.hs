@@ -8,14 +8,15 @@ main = do
   putSteps test
   putSteps screwTest
   putSteps bigTest
-      where putSteps = putStrLn . show . findSteps
+      where putSteps = putStrLn . show . take 1 . findSteps
 
-findSteps :: Quilt -> [(Vertex, Vertex)]
+findSteps :: Quilt -> [[(Vertex, Vertex)]]
 findSteps q = recur [q]
     where recur [] = []
           recur qs
-              | [] == filter (\q' -> [] == edges q') qs = recur $ concatMap nextSteps qs
-              | otherwise = reverse . steps $ head qs
+              | [] == filter noEdges qs = recur $ concatMap nextSteps qs
+              | otherwise = concat [map (reverse . steps) qs, recur $ filter (not . noEdges) qs]
+          noEdges q' = [] == edges q'
 
 nextSteps :: Quilt -> [Quilt]
 nextSteps q = catMaybes . map stitch . nub $ edges q
