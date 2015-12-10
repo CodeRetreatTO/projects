@@ -1,0 +1,25 @@
+* Computerized sewing!
+
+Given a set of patches with dimensions: 1x1, 2x2, 2x1, 1x2
+
+|_| 
+
+|  |
+|__|
+
+|__|
+
+| |
+|_|
+
+
+And a pattern for combining these pieces to create a quilt. 
+
+Find the most efficient way of sewing the seams. (Find the least number of 'sews')
+
+Rules for sewing:
+- Only allowed straight "lines" (no rotating the quilt)
+- Only allowed to sew 2 pieces together at a time (no lining up 3x3 pieces an sewing across)
+
+Bonus 1: List the steps.
+Bonus 2: Allow for rotating the quilt.
