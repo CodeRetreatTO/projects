@@ -6,32 +6,36 @@ import Data.Maybe
 type Vertex = String
 data Direction = U | O deriving (Eq, Show)
 data Edge = Edge Direction Vertex Vertex deriving (Eq, Show)
-data Quilt = Quilt { edges :: [Edge], vertices :: [Vertex], steps :: [(Vertex, Vertex)] } deriving (Show)
+data Quilt = Quilt { edges :: [Edge], vertices :: [Vertex], steps :: [(Vertex, Vertex)] } deriving (Eq, Show)
 
 dirOf :: Edge -> Direction
 dirOf (Edge d _ _) = d
 
+mkTest :: String -> [Edge] -> Quilt
+mkTest vs es = Quilt { vertices = group vs, edges = es, steps = [] }
+
 test :: Quilt
-test = Quilt {
-         vertices = ["a", "b", "c"]
-       , edges = [Edge U "a" "b", Edge U "a" "c", Edge O "b" "c"]
-       , steps = []
-       }
+test = mkTest "abc" [Edge U "a" "b", Edge U "a" "c", Edge O "b" "c"]
 
 bigTest :: Quilt
-bigTest = Quilt {
-            vertices = ["a", "b", "c", "d", "e", "f", "g", "h"]
-          , edges = [
-             Edge O "a" "b", Edge U "a" "c"
-            ,Edge U "b" "d", Edge U "b" "e"
-            ,Edge O "c" "d", Edge O "c" "h", Edge U "c" "f", Edge U "c" "g"
-            ,Edge U "d" "h", Edge O "d" "e"
-            ,Edge U "e" "h"
-            ,Edge O "f" "g"
-            ,Edge O "g" "h"
+bigTest = mkTest "abcdefgh" [
+           Edge O "a" "b", Edge U "a" "c"
+          ,Edge U "b" "d", Edge U "b" "e"
+          ,Edge O "c" "d", Edge O "c" "h", Edge U "c" "f", Edge U "c" "g"
+          ,Edge U "d" "h", Edge O "d" "e"
+          ,Edge U "e" "h"
+          ,Edge O "f" "g"
+          ,Edge O "g" "h"
+          ]
+
+screwTest :: Quilt
+screwTest = mkTest "abcdef" [
+             Edge O "a" "b", Edge U "a" "d", Edge U "a" "c", Edge O "a" "e"
+            ,Edge U "b" "e"
+            ,Edge O "c" "d", Edge O "c" "f"
+            ,Edge O "d" "e", Edge U "d" "f"
+            ,Edge U "e" "f"
             ]
-          , steps = []
-          }
 
 combineVertices :: Quilt -> Vertex -> Vertex -> Maybe Quilt
 combineVertices q v v' = case nub . map dirOf . filter relevantE $ newEs of
@@ -59,6 +63,7 @@ nextSteps q = catMaybes . map stitch . nub $ edges q
 
 findSteps :: Quilt -> [(Vertex, Vertex)]
 findSteps q = recur [q]
-    where recur qs = case filter (\q' -> [] == edges q') qs of
-                       [] -> recur $ concatMap nextSteps qs
-                       qs' -> reverse . steps $ head qs'
+    where recur [] = []
+          recur qs
+              | [] == filter (\q' -> [] == edges q') qs = recur $ concatMap nextSteps qs
+              | otherwise = reverse . steps $ head qs
