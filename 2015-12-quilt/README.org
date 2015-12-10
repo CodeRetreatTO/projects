@@ -2,6 +2,7 @@
 
 Given a set of patches with dimensions: 1x1, 2x2, 2x1, 1x2
 
+#+BEGIN_EXAMPLE ascii-art
 |_| 
 
 |  |
@@ -11,6 +12,7 @@ Given a set of patches with dimensions: 1x1, 2x2, 2x1, 1x2
 
 | |
 |_|
+#+END_EXAMPLE
 
 
 And a pattern for combining these pieces to create a quilt. 
