@@ -30,7 +30,7 @@ combineVertices q v v' = case nub . map dirOf . filter relevantE $ newEs of
     where newVertex = v ++ v'
           newVs = newVertex : (filter (\e -> not $ e `elem` [v, v']) $ vertices q)
           newEs = map (replaceV v newVertex) . map (replaceV v' newVertex) $ edges q
-          relevantE (Edge _ a b) = and [a == newVertex, b == newVertex]
+          relevantE edge = and [isLoop edge, connects edge newVertex]
 
 ---------- Datatypes
 type Vertex = String
@@ -43,6 +43,12 @@ replaceV old new edge@(Edge dir a b)
     | a == old = Edge dir new b
     | b == old = Edge dir a new
     | otherwise = edge
+
+isLoop :: Edge -> Bool
+isLoop (Edge _ a b) = a == b
+
+connects :: Edge -> Vertex -> Bool
+connects (Edge _ a b) v = or [a == v, b == v]
 
 dirOf :: Edge -> Direction
 dirOf (Edge d _ _) = d
